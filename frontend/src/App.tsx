@@ -1,37 +1,28 @@
-import { Routes, Route, Link } from 'react-router'
+import { Routes, Route } from 'react-router'
+import { FluentProvider, webLightTheme } from '@fluentui/react-components'
 import './App.css'
 import Home from './common/home'
 import Clients from './pages/clients'
 import Products from './pages/products'
+import UserHeader from './components/UserHeader'
+import FluentNavigation from './components/FluentNavigation'
 
 function App() {
   return (
-    <div className="app">
-      <nav className="navbar">
-        <div className="nav-brand">
-          <h2>Mi Sistema</h2>
-        </div>
-        <ul className="nav-links">
-          <li>
-            <Link to="/" className="nav-link">Inicio</Link>
-          </li>
-          <li>
-            <Link to="/clients" className="nav-link">Clientes</Link>
-          </li>
-          <li>
-            <Link to="/products" className="nav-link">Productos</Link>
-          </li>
-        </ul>
-      </nav>
+    <FluentProvider theme={webLightTheme}>
+      <div className="app">
+        <UserHeader />
+        <FluentNavigation />
 
-      <main className="main-content">
-        <Routes>
-          <Route path="/" element={<Home />} />
-          <Route path="/clients" element={<Clients />} />
-          <Route path="/products" element={<Products />} />
-        </Routes>
-      </main>
-    </div>
+        <main className="main-content">
+          <Routes>
+            <Route path="/" element={<Home />} />
+            <Route path="/clients" element={<Clients />} />
+            <Route path="/products" element={<Products />} />
+          </Routes>
+        </main>
+      </div>
+    </FluentProvider>
   )
 }
 

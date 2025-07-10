@@ -2,51 +2,30 @@
   min-height: 100vh;
   display: flex;
   flex-direction: column;
+  background: white;
 }
 
-.navbar {
-  background-color: #2c3e50;
-  padding: 1rem 2rem;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-}
-
-.nav-brand h2 {
-  color: white;
-  margin: 0;
-  font-size: 1.5rem;
-}
-
-.nav-links {
-  list-style: none;
-  display: flex;
-  gap: 2rem;
-  margin: 0;
-  padding: 0;
-}
-
-.nav-link {
-  color: white;
-  text-decoration: none;
-  padding: 0.5rem 1rem;
-  border-radius: 4px;
-  transition: background-color 0.3s ease;
-  font-weight: 500;
-}
-
-.nav-link:hover {
-  background-color: #34495e;
-  color: #ecf0f1;
+/* Asegurar que todo el texto sea visible */
+.main-content h1,
+.main-content h2,
+.main-content h3,
+.main-content h4,
+.main-content h5,
+.main-content h6,
+.main-content p,
+.main-content div {
+  color: #323130;
 }
 
 .main-content {
   flex: 1;
-  padding: 2rem;
-  max-width: 1200px;
-  margin: 0 auto;
+  padding: 0 20px; /* Padding horizontal de 20px */
+  margin: 0;
   width: 100%;
+  background: white;
+  color: #323130;
+  min-height: 400px;
+  overflow: auto;
 }
 
 /* Estilos responsivos */
