@@ -1,4 +1,4 @@
-import React from 'react'
+import React, { useState, useEffect } from 'react'
 import {
   Text,
   Card,
@@ -13,13 +13,19 @@ import {
   DataGridBody,
   createTableColumn,
   makeStyles,
-  tokens
+  tokens,
+  Spinner,
+  MessageBar,
+  MessageBarBody
 } from '@fluentui/react-components'
 import type { TableColumnDefinition } from '@fluentui/react-components'
 import {
   WeatherSunnyRegular,
-  ArrowSyncRegular
+  ArrowSyncRegular,
+  ErrorCircleRegular
 } from '@fluentui/react-icons'
+import { weatherClient, type WeatherData } from '../services/weather-client'
+import { ApiException } from '../services/http-client'
 
 const useStyles = makeStyles({
   container: {
@@ -53,28 +59,61 @@ const useStyles = makeStyles({
     fontStyle: 'italic',
     color: tokens.colorNeutralForeground2,
   },
+  loadingContainer: {
+    display: 'flex',
+    justifyContent: 'center',
+    alignItems: 'center',
+    padding: '40px',
+    gap: '12px',
+  },
+  errorContainer: {
+    marginBottom: '16px',
+  },
 })
-
-interface WeatherData {
-  id: string
-  date: string
-  temperatureC: number
-  temperatureF: number
-  summary: string
-}
-
-const mockWeatherData: WeatherData[] = [
-  { id: '1', date: '2025-07-12', temperatureC: 25, temperatureF: 77, summary: 'Soleado' },
-  { id: '2', date: '2025-07-13', temperatureC: 22, temperatureF: 72, summary: 'Parcialmente nublado' },
-  { id: '3', date: '2025-07-14', temperatureC: 18, temperatureF: 64, summary: 'Lluvioso' },
-  { id: '4', date: '2025-07-15', temperatureC: 28, temperatureF: 82, summary: 'Muy soleado' },
-  { id: '5', date: '2025-07-16', temperatureC: 20, temperatureF: 68, summary: 'Nublado' },
-  { id: '6', date: '2025-07-17', temperatureC: 15, temperatureF: 59, summary: 'Tormentoso' },
-  { id: '7', date: '2025-07-18', temperatureC: 26, temperatureF: 79, summary: 'Soleado con nubes' },
-]
 
 const Weather: React.FC = () => {
   const styles = useStyles()
+  const [weatherData, setWeatherData] = useState<WeatherData[]>([])
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState<string | null>(null)
+
+  const loadWeatherData = async () => {
+    try {
+      setLoading(true)
+      setError(null)
+      const data = await weatherClient.getWeatherForecast()
+      setWeatherData(data)
+    } catch (err) {
+      console.error('Error loading weather data:', err)
+      let errorMessage = 'Unknown error loading weather data'
+      
+      if (err instanceof ApiException) {
+        switch (err.status) {
+          case 404:
+            errorMessage = 'Weather data not found'
+            break
+          case 500:
+            errorMessage = 'Server error while fetching weather data'
+            break
+          case 0:
+            errorMessage = 'Connection error. Please check your internet connection and that the API is running'
+            break
+          default:
+            errorMessage = `Server error: ${err.message}`
+        }
+      } else if (err instanceof Error) {
+        errorMessage = err.message
+      }
+      
+      setError(errorMessage)
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  useEffect(() => {
+    loadWeatherData()
+  }, [])
 
   const formatDate = (dateString: string) => {
     return new Date(dateString).toLocaleDateString('es-ES', {
@@ -89,13 +128,13 @@ const Weather: React.FC = () => {
     createTableColumn<WeatherData>({
       columnId: 'date',
       compare: (a, b) => a.date.localeCompare(b.date),
-      renderHeaderCell: () => 'Fecha',
+      renderHeaderCell: () => 'Date',
       renderCell: (item) => formatDate(item.date),
     }),
     createTableColumn<WeatherData>({
       columnId: 'temperatureC',
       compare: (a, b) => a.temperatureC - b.temperatureC,
-      renderHeaderCell: () => 'Temperatura (°C)',
+      renderHeaderCell: () => 'Temperature (°C)',
       renderCell: (item) => (
         <span className={styles.temperatureCell}>
           {item.temperatureC}°C
@@ -105,7 +144,7 @@ const Weather: React.FC = () => {
     createTableColumn<WeatherData>({
       columnId: 'temperatureF',
       compare: (a, b) => a.temperatureF - b.temperatureF,
-      renderHeaderCell: () => 'Temperatura (°F)',
+      renderHeaderCell: () => 'Temperature (°F)',
       renderCell: (item) => (
         <span className={styles.temperatureCell}>
           {item.temperatureF}°F
@@ -115,7 +154,7 @@ const Weather: React.FC = () => {
     createTableColumn<WeatherData>({
       columnId: 'summary',
       compare: (a, b) => a.summary.localeCompare(b.summary),
-      renderHeaderCell: () => 'Resumen',
+      renderHeaderCell: () => 'Summary',
       renderCell: (item) => (
         <span className={styles.summaryCell}>
           {item.summary}
@@ -125,65 +164,94 @@ const Weather: React.FC = () => {
   ]
 
   const handleRefresh = () => {
-    console.log('Actualizando datos meteorológicos...')
+    loadWeatherData()
   }
+
+  const averageTemperature = weatherData.length > 0 
+    ? Math.round(weatherData.reduce((sum, item) => sum + item.temperatureC, 0) / weatherData.length)
+    : 0
 
   return (
     <div className={styles.container}>
       <div className={styles.header}>
         <Text as="h1" size={800} weight="semibold" className={styles.title}>
-          Pronóstico del Tiempo
+          Weather Forecast
         </Text>
         <Button 
           icon={<ArrowSyncRegular />} 
           appearance="primary"
           onClick={handleRefresh}
+          disabled={loading}
         >
-          Actualizar
+          {loading ? 'Loading...' : 'Refresh'}
         </Button>
       </div>
       
       <Body1>
-        Consulta el pronóstico del tiempo para los próximos días.
+        Check the weather forecast for the upcoming days.
       </Body1>
-      
-      <Card className={styles.infoCard}>
-        <CardHeader>
-          <Text weight="semibold">
-            <WeatherSunnyRegular style={{ marginRight: '8px' }} />
-            Información Meteorológica
-          </Text>
-        </CardHeader>
-        <Body1>
-          Mostrando pronóstico para {mockWeatherData.length} días. 
-          Temperatura promedio: {Math.round(mockWeatherData.reduce((sum, item) => sum + item.temperatureC, 0) / mockWeatherData.length)}°C
-        </Body1>
-      </Card>
 
-      <DataGrid
-        items={mockWeatherData}
-        columns={columns}
-        sortable
-        className={styles.dataGrid}
-        getRowId={(item) => item.id}
-      >
-        <DataGridHeader>
-          <DataGridRow>
-            {({ renderHeaderCell }) => (
-              <DataGridHeaderCell>{renderHeaderCell()}</DataGridHeaderCell>
-            )}
-          </DataGridRow>
-        </DataGridHeader>
-        <DataGridBody<WeatherData>>
-          {({ item, rowId }) => (
-            <DataGridRow<WeatherData> key={rowId}>
-              {({ renderCell }) => (
-                <DataGridCell>{renderCell(item)}</DataGridCell>
+      {error && (
+        <div className={styles.errorContainer}>
+          <MessageBar intent="error">
+            <MessageBarBody>
+              <ErrorCircleRegular style={{ marginRight: '8px' }} />
+              {error}
+            </MessageBarBody>
+          </MessageBar>
+        </div>
+      )}
+
+      {loading && !error && (
+        <div className={styles.loadingContainer}>
+          <Spinner size="medium" />
+          <Body1>Loading weather data...</Body1>
+        </div>
+      )}
+
+      {!loading && !error && (
+        <>
+          <Card className={styles.infoCard}>
+            <CardHeader>
+              <Text weight="semibold">
+                <WeatherSunnyRegular style={{ marginRight: '8px' }} />
+                Weather Information
+              </Text>
+            </CardHeader>
+            <Body1>
+              Showing forecast for {weatherData.length} days. 
+              {weatherData.length > 0 && (
+                <> Average temperature: {averageTemperature}°C</>
               )}
-            </DataGridRow>
-          )}
-        </DataGridBody>
-      </DataGrid>
+            </Body1>
+          </Card>
+
+          <DataGrid
+            items={weatherData}
+            columns={columns}
+            sortable
+            className={styles.dataGrid}
+            getRowId={(item) => item.id}
+          >
+            <DataGridHeader>
+              <DataGridRow>
+                {({ renderHeaderCell }) => (
+                  <DataGridHeaderCell>{renderHeaderCell()}</DataGridHeaderCell>
+                )}
+              </DataGridRow>
+            </DataGridHeader>
+            <DataGridBody<WeatherData>>
+              {({ item, rowId }) => (
+                <DataGridRow<WeatherData> key={rowId}>
+                  {({ renderCell }) => (
+                    <DataGridCell>{renderCell(item)}</DataGridCell>
+                  )}
+                </DataGridRow>
+              )}
+            </DataGridBody>
+          </DataGrid>
+        </>
+      )}
     </div>
   )
 }
