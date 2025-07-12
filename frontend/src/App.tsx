@@ -2,8 +2,7 @@ import { Routes, Route } from 'react-router'
 import { FluentProvider, webLightTheme } from '@fluentui/react-components'
 import './App.css'
 import Home from './common/home'
-import Clients from './pages/clients'
-import Products from './pages/products'
+import Wheater from './pages/weather'
 import UserHeader from './components/UserHeader'
 import FluentNavigation from './components/FluentNavigation'
 
@@ -17,8 +16,7 @@ function App() {
         <main className="main-content">
           <Routes>
             <Route path="/" element={<Home />} />
-            <Route path="/clients" element={<Clients />} />
-            <Route path="/products" element={<Products />} />
+            <Route path="/wheater" element={<Wheater />} />
           </Routes>
         </main>
       </div>

@@ -66,7 +66,7 @@ const mockClients: Client[] = [
   { id: '3', name: 'Carlos López', email: 'carlos@empresa.com', phone: '555-123-4567', company: 'Empresa C' },
 ]
 
-const Clients: React.FC = () => {
+const Wheaters: React.FC = () => {
   const styles = useStyles()
 
   const columns: TableColumnDefinition<Client>[] = [
@@ -158,4 +158,4 @@ const Clients: React.FC = () => {
   )
 }
 
-export default Clients
+export default Wheaters

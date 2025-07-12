@@ -58,23 +58,16 @@ const FluentNavigation: React.FC = () => {
       value: 'home'
     },
     {
-      path: '/clients',
-      label: 'Clientes',
+      path: '/weather',
+      label: 'Weather',
       icon: <PeopleRegular />,
-      value: 'clients'
-    },
-    {
-      path: '/products',
-      label: 'Productos',
-      icon: <BoxRegular />,
-      value: 'products'
+      value: 'weather'
     }
   ]
 
   const getSelectedValue = () => {
     if (location.pathname === '/') return 'home'
-    if (location.pathname.startsWith('/clients')) return 'clients'
-    if (location.pathname.startsWith('/products')) return 'products'
+    if (location.pathname.startsWith('/weather')) return 'weather'
     return 'home'
   }
 
