@@ -9,8 +9,7 @@ import {
 import type { SelectTabData, SelectTabEvent } from '@fluentui/react-components'
 import {
   HomeRegular,
-  PeopleRegular,
-  BoxRegular
+  WeatherSunnyRegular
 } from '@fluentui/react-icons'
 
 const useStyles = makeStyles({
@@ -60,7 +59,7 @@ const FluentNavigation: React.FC = () => {
     {
       path: '/weather',
       label: 'Weather',
-      icon: <PeopleRegular />,
+      icon: <WeatherSunnyRegular />,
       value: 'weather'
     }
   ]

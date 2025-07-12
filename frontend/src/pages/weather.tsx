@@ -17,9 +17,8 @@ import {
 } from '@fluentui/react-components'
 import type { TableColumnDefinition } from '@fluentui/react-components'
 import {
-  AddRegular,
-  EditRegular,
-  DeleteRegular
+  WeatherSunnyRegular,
+  ArrowSyncRegular
 } from '@fluentui/react-icons'
 
 const useStyles = makeStyles({
@@ -46,92 +45,123 @@ const useStyles = makeStyles({
   dataGrid: {
     width: '100%',
   },
-  actionButtons: {
-    display: 'flex',
-    gap: '8px',
+  temperatureCell: {
+    fontWeight: tokens.fontWeightSemibold,
+    color: tokens.colorBrandForeground1,
+  },
+  summaryCell: {
+    fontStyle: 'italic',
+    color: tokens.colorNeutralForeground2,
   },
 })
 
-interface Client {
+interface WeatherData {
   id: string
-  name: string
-  email: string
-  phone: string
-  company: string
+  date: string
+  temperatureC: number
+  temperatureF: number
+  summary: string
 }
 
-const mockClients: Client[] = [
-  { id: '1', name: 'Juan Pérez', email: 'juan@empresa.com', phone: '123-456-7890', company: 'Empresa A' },
-  { id: '2', name: 'María García', email: 'maria@empresa.com', phone: '098-765-4321', company: 'Empresa B' },
-  { id: '3', name: 'Carlos López', email: 'carlos@empresa.com', phone: '555-123-4567', company: 'Empresa C' },
+const mockWeatherData: WeatherData[] = [
+  { id: '1', date: '2025-07-12', temperatureC: 25, temperatureF: 77, summary: 'Soleado' },
+  { id: '2', date: '2025-07-13', temperatureC: 22, temperatureF: 72, summary: 'Parcialmente nublado' },
+  { id: '3', date: '2025-07-14', temperatureC: 18, temperatureF: 64, summary: 'Lluvioso' },
+  { id: '4', date: '2025-07-15', temperatureC: 28, temperatureF: 82, summary: 'Muy soleado' },
+  { id: '5', date: '2025-07-16', temperatureC: 20, temperatureF: 68, summary: 'Nublado' },
+  { id: '6', date: '2025-07-17', temperatureC: 15, temperatureF: 59, summary: 'Tormentoso' },
+  { id: '7', date: '2025-07-18', temperatureC: 26, temperatureF: 79, summary: 'Soleado con nubes' },
 ]
 
-const Wheaters: React.FC = () => {
+const Weather: React.FC = () => {
   const styles = useStyles()
 
-  const columns: TableColumnDefinition<Client>[] = [
-    createTableColumn<Client>({
-      columnId: 'name',
-      compare: (a, b) => a.name.localeCompare(b.name),
-      renderHeaderCell: () => 'Nombre',
-      renderCell: (item) => item.name,
+  const formatDate = (dateString: string) => {
+    return new Date(dateString).toLocaleDateString('es-ES', {
+      weekday: 'long',
+      year: 'numeric',
+      month: 'long',
+      day: 'numeric'
+    })
+  }
+
+  const columns: TableColumnDefinition<WeatherData>[] = [
+    createTableColumn<WeatherData>({
+      columnId: 'date',
+      compare: (a, b) => a.date.localeCompare(b.date),
+      renderHeaderCell: () => 'Fecha',
+      renderCell: (item) => formatDate(item.date),
     }),
-    createTableColumn<Client>({
-      columnId: 'email',
-      compare: (a, b) => a.email.localeCompare(b.email),
-      renderHeaderCell: () => 'Email',
-      renderCell: (item) => item.email,
+    createTableColumn<WeatherData>({
+      columnId: 'temperatureC',
+      compare: (a, b) => a.temperatureC - b.temperatureC,
+      renderHeaderCell: () => 'Temperatura (°C)',
+      renderCell: (item) => (
+        <span className={styles.temperatureCell}>
+          {item.temperatureC}°C
+        </span>
+      ),
     }),
-    createTableColumn<Client>({
-      columnId: 'phone',
-      compare: (a, b) => a.phone.localeCompare(b.phone),
-      renderHeaderCell: () => 'Teléfono',
-      renderCell: (item) => item.phone,
+    createTableColumn<WeatherData>({
+      columnId: 'temperatureF',
+      compare: (a, b) => a.temperatureF - b.temperatureF,
+      renderHeaderCell: () => 'Temperatura (°F)',
+      renderCell: (item) => (
+        <span className={styles.temperatureCell}>
+          {item.temperatureF}°F
+        </span>
+      ),
     }),
-    createTableColumn<Client>({
-      columnId: 'company',
-      compare: (a, b) => a.company.localeCompare(b.company),
-      renderHeaderCell: () => 'Empresa',
-      renderCell: (item) => item.company,
-    }),
-    createTableColumn<Client>({
-      columnId: 'actions',
-      renderHeaderCell: () => 'Acciones',
-      renderCell: () => (
-        <div className={styles.actionButtons}>
-          <Button size="small" icon={<EditRegular />} appearance="subtle" />
-          <Button size="small" icon={<DeleteRegular />} appearance="subtle" />
-        </div>
+    createTableColumn<WeatherData>({
+      columnId: 'summary',
+      compare: (a, b) => a.summary.localeCompare(b.summary),
+      renderHeaderCell: () => 'Resumen',
+      renderCell: (item) => (
+        <span className={styles.summaryCell}>
+          {item.summary}
+        </span>
       ),
     }),
   ]
+
+  const handleRefresh = () => {
+    console.log('Actualizando datos meteorológicos...')
+  }
 
   return (
     <div className={styles.container}>
       <div className={styles.header}>
         <Text as="h1" size={800} weight="semibold" className={styles.title}>
-          Listado de Clientes
+          Pronóstico del Tiempo
         </Text>
-        <Button icon={<AddRegular />} appearance="primary">
-          Agregar Cliente
+        <Button 
+          icon={<ArrowSyncRegular />} 
+          appearance="primary"
+          onClick={handleRefresh}
+        >
+          Actualizar
         </Button>
       </div>
       
       <Body1>
-        Gestiona todos los clientes del sistema desde esta sección.
+        Consulta el pronóstico del tiempo para los próximos días.
       </Body1>
       
       <Card className={styles.infoCard}>
         <CardHeader>
-          <Text weight="semibold">Información</Text>
+          <Text weight="semibold">
+            <WeatherSunnyRegular style={{ marginRight: '8px' }} />
+            Información Meteorológica
+          </Text>
         </CardHeader>
         <Body1>
-          Total de clientes registrados: {mockClients.length}
+          Mostrando pronóstico para {mockWeatherData.length} días. 
+          Temperatura promedio: {Math.round(mockWeatherData.reduce((sum, item) => sum + item.temperatureC, 0) / mockWeatherData.length)}°C
         </Body1>
       </Card>
 
       <DataGrid
-        items={mockClients}
+        items={mockWeatherData}
         columns={columns}
         sortable
         className={styles.dataGrid}
@@ -144,9 +174,9 @@ const Wheaters: React.FC = () => {
             )}
           </DataGridRow>
         </DataGridHeader>
-        <DataGridBody<Client>>
+        <DataGridBody<WeatherData>>
           {({ item, rowId }) => (
-            <DataGridRow<Client> key={rowId}>
+            <DataGridRow<WeatherData> key={rowId}>
               {({ renderCell }) => (
                 <DataGridCell>{renderCell(item)}</DataGridCell>
               )}
@@ -158,4 +188,4 @@ const Wheaters: React.FC = () => {
   )
 }
 
-export default Wheaters
+export default Weather
